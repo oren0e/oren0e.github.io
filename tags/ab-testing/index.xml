@@ -13,10 +13,10 @@
     
     <item>
       <title>Solving The Multi-Armed Bandit Problem with Thompson Sampling</title>
-      <link>/mab_thompson/</link>
+      <link>/2020/04/27/mab_thompson/</link>
       <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/mab_thompson/</guid>
+      <guid>/2020/04/27/mab_thompson/</guid>
       <description>Imagine that you are a data scientist working for a company that offers some sort of service by subscription.</description>
     </item>
     
