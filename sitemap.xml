@@ -18,17 +18,12 @@
   </url>
   
   <url>
-    <loc>/posts/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/reinforcement-learning/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/mab_thompson/</loc>
+    <loc>/mab_thompson/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   

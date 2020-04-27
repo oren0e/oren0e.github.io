@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="format-detection" content="telephone=no"/>
 
-    <title>reinforcement learning | Oren&#39;s ML Lounge</title>
+    <title>Solving The Multi-Armed Bandit Problem with Thompson Sampling | Oren&#39;s ML Lounge</title>
     
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
@@ -28,8 +28,6 @@
     
     
  
-    
-    <link rel="alternate" type="application/rss+xml" href="/tags/reinforcement-learning/index.xml" title="Oren's ML Lounge" />
     </head>
 
     <body>
@@ -134,27 +132,52 @@
         <div id="content" class="content-container">
         
 
-  <h1>Tagged "reinforcement learning"</h1>
-  
-  
+<h1 class="post-title">Solving The Multi-Armed Bandit Problem with Thompson Sampling</h1>
     
-    <article>
-            <h2>
-                <a href="/mab_thompson/">
-                    Solving The Multi-Armed Bandit Problem with Thompson Sampling
-                </a>
-            </h2>
-            <div>
-                <p>Imagine that you are a data scientist working for a company that offers some sort of service by subscription.</p>
-                
-                <p><a href="/mab_thompson/">Read more...</a></p>
-                
-            </div>
-            <div class="post-footer">
-            <time>April 27, 2020</time>
-            </div> 
-        </article>
+    <time>April 27, 2020</time>
     
+    <div>
+        <p>
+        <p>Imagine that you are a data scientist working for a company that offers some sort of service by subscription. Let&rsquo;s be more specific - your company offers an online LaTeX editor that everyone can
+use with some limitations: They cannot write long documents and they can&rsquo;t use math notation, unless, they choose to sign up to your website and for a small fee of 10$ a month they get the access to all of your
+latex website features.</p>
+<p>One day, The VP of design comes to you and says that his team have made some improvement to the toolbar of the editing window and they think that this will help the users to be more effective, thus
+increasing the sign-ups for you website. You are more skeptic, so you conduct an A/B test where you offer the regular-website version to a randomly selected group of your users, and the new-toolbar version to a
+second randomly selected group of users. You observe the sign-up rate for each group and conduct a statistical test which confirms that indeed, the new version &ldquo;causes&rdquo; more users to signup. You have increased
+your companies revenues, and you and the VP of design give high-five to each other.</p>
+<p>After a month, the VP of design knocks on your door once more. This time, he says that his team had produced several toolbar designs and they were not able to decide which version is better. He&rsquo;s sure that
+you will be able to A/B test them all and find the best version that increases signups the most. Again, you are more skeptic.</p>
+<h2 id="why-ab-testing-with-multiple-variants-is-a-bad-idea">Why A/B Testing With Multiple Variants is a Bad Idea</h2>
+<p>If you follow along the lines of a standard A/B test procedure when you have multiple variations that you want to test, you will probably start by comparing each variant against the control group, i.e., the group that gets to see the original non-altered website. There are couple of problems with that:</p>
+<ol>
+<li>With many comparisons, the probability of discovering at least one false-significant result, i.e., rejecting the null hypothesis when it is actually true, increases. The higher the number of variants to compare, the higher the chance of finding a false &ldquo;winner&rdquo;.</li>
+<li>It is not enough to compare each variant against the control to find the best variation. You will also need to compare each variant against each of the other variants. In this case, the number of tests increase and the chances of finding a false winner increase even more.</li>
+<li>Another reason why this is a bad thing to do is that you&rsquo;ll need more data to conclude which is the winning variation, this in turn will lead you to run the tests longer. As the old saying goes: time is money. While you are conducting your tests you are loosing potential customers - these are the ones that get assigned to see the worse variants.</li>
+</ol>
+<h2 id="the-multi-armed-bandit-problem">The Multi-Armed Bandit Problem</h2>
+<p>The problem our data scientist from the story above faces is a general problem of <em>exploration vs exploitation</em>, i.e., choosing the right ratio between exploring the different options and investigating each option in depth. These kind of problems are known as the Multi-Armed Bandit (MAB) problems. The origin of the name comes from the casino world, a place where a lot of statistical terms were firstly coined. The &ldquo;bandit&rdquo; is the slot machine which was called like that because it basically stole money from people. Each machine has an &ldquo;arm&rdquo; that the player pulls in order to start to play.</p>
+<p>The MAB problem describes a person who comes into a casino and has limited time so he can play only $N$ games. He is facing a row of $M$ machines which all have different mechanisms so the probability of winning each one is different. The question is what should this person do? How many machines should he play and for how many rounds each?</p>
+<h2 id="a-bayesian-solution">A Bayesian Solution</h2>
+<p>Following up on point 3 above - what if there was a procedure which could choose the best variant <em>at real time</em></p>
+
+        </p>
+    </div>
+    
+
+    
+
+    <div class="page-footer">
+        
+        <hr class="footer-divider">
+        
+            <a class="tag" href="/tags/reinforcement-learning">#reinforcement learning</a>
+        
+            <a class="tag" href="/tags/bayes">#bayes</a>
+        
+            <a class="tag" href="/tags/ab-testing">#AB testing</a>
+        
+      
+    </div>
 
 
         
