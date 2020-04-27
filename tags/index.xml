@@ -2,39 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Oren&#39;s ML Lounge</title>
-    <link>/posts/tags/</link>
+    <link>/tags/</link>
     <description>Recent content in Tags on Oren&#39;s ML Lounge</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 27 Apr 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/posts/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>AB testing</title>
-      <link>/posts/tags/ab-testing/</link>
+      <link>/tags/ab-testing/</link>
       <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/posts/tags/ab-testing/</guid>
+      <guid>/tags/ab-testing/</guid>
       <description></description>
     </item>
     
     <item>
       <title>bayes</title>
-      <link>/posts/tags/bayes/</link>
+      <link>/tags/bayes/</link>
       <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/posts/tags/bayes/</guid>
+      <guid>/tags/bayes/</guid>
       <description></description>
     </item>
     
     <item>
       <title>reinforcement learning</title>
-      <link>/posts/tags/reinforcement-learning/</link>
+      <link>/tags/reinforcement-learning/</link>
       <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/posts/tags/reinforcement-learning/</guid>
+      <guid>/tags/reinforcement-learning/</guid>
       <description></description>
     </item>
     

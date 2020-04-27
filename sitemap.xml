@@ -3,12 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/posts/tags/ab-testing/</loc>
+    <loc>/tags/ab-testing/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/tags/bayes/</loc>
+    <loc>/tags/bayes/</loc>
+    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
@@ -18,31 +23,26 @@
   </url>
   
   <url>
-    <loc>/posts/posts/</loc>
+    <loc>/tags/reinforcement-learning/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/tags/reinforcement-learning/</loc>
+    <loc>/posts/mab_thompson/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/posts/mab_thompson/</loc>
+    <loc>/tags/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/tags/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
+    <loc>/about/</loc>
   </url>
   
   <url>
-    <loc>/posts/about/</loc>
-  </url>
-  
-  <url>
-    <loc>/posts/categories/</loc>
+    <loc>/categories/</loc>
   </url>
   
 </urlset>

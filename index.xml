@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Oren&#39;s ML Lounge</title>
-    <link>/posts/</link>
+    <link>/</link>
     <description>Recent content on Oren&#39;s ML Lounge</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 27 Apr 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Solving The Multi-Armed Bandit Problem with Thompson Sampling</title>
-      <link>/posts/posts/mab_thompson/</link>
+      <link>/posts/mab_thompson/</link>
       <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/posts/posts/mab_thompson/</guid>
+      <guid>/posts/mab_thompson/</guid>
       <description>Imagine that you are a data scientist working for a company that offers some sort of service by subscription.</description>
     </item>
     
     <item>
       <title>About</title>
-      <link>/posts/about/</link>
+      <link>/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/posts/about/</guid>
+      <guid>/about/</guid>
       <description>This blog is about me trying to explain, mostly to myself, concepts that I find interesting in Machine Learning, Statistics, and other data-related topics.</description>
     </item>
     
