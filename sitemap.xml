@@ -8,37 +8,7 @@
   </url>
   
   <url>
-    <loc>/tags/ab-testing/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/bayes/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/reinforcement-learning/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/2020/04/27/mab_thompson/</loc>
-    <lastmod>2020-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-04-27T00:00:00+00:00</lastmod>
   </url>
   
@@ -48,6 +18,10 @@
   
   <url>
     <loc>/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
   </url>
   
 </urlset>
