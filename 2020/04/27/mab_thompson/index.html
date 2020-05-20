@@ -320,10 +320,10 @@ The <code>payouts</code> in the constructor is a Numpy array of the true convers
 </code></pre></div><p>At the end of the simulation we get an output of the total reward, i.e., the total number of sign-ups, and the distribution of sign-ups across the different variants.<br>
 We can see that variant 2 (index 2 in the <code>pay</code> array, starting from 0) has the highest underlying conversion rate, but we also have variants 0 and 4 with somewhat high conversion rates as well. We can see from the output that almost all of the sign-ups in our simulation were done under variant 2 and very few under variants 0 and 4, so the results are consistent with the true rates.</p>
 <p>Let&rsquo;s plot the distributions after varying number of iterations:</p>
-<p><img src="/iter10.png" alt="">
-<img src="/iter200.png" alt="">
-<img src="/iter500.png" alt="">
-<img src="/iter900.png" alt=""></p>
+<img src="/iter10.png" style="max-width:100%">
+<img src="/iter200.png" style="max-width:100%">
+<img src="/iter500.png" style="max-width:100%">
+<img src="/iter900.png" style="max-width:100%">
 <p>We can see that after 10 iterations variants 2 and 4 have large probabilities to sign-up, but as the iterations continue we see that the best variant, variant 2, is converging to its underlying probability with very small uncertainty (this is because we are in a simulation). Notice also that the poor variants have all fatter left tails indicating its low underlying conversion rates.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>In this post we saw how can we utilize a Bayesian method, the Thompson Sampling procedure, in settings where we need to make a decision about which version of our product to go with among <strong>several</strong> different possible versions.<br>
