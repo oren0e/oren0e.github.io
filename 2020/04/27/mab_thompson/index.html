@@ -172,6 +172,13 @@
         <p>Imagine that you are a data scientist working for a company that offers some sort of service by subscription. Let&rsquo;s be more specific - your company offers an online LaTeX editor that everyone can
 use with some limitations: They cannot write long documents and they can&rsquo;t use math notation, unless, they choose to sign up to your website and for a small fee of 10$ a month they get the access to all of your
 latex website features.</p>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js", "TeX/AMSmath.js"],
+        jax: ["input/TeX", "output/SVG"],
+        SVG: { linebreaks: { automatic: true } }
+    })
+</script>
 <p>One day, The VP of design comes to you and says that his team have made some improvement to the toolbar of the editing window and they think that this will help the users to be more effective, thus
 increasing the sign-ups for you website. You are more skeptic, so you conduct an A/B test where you offer the regular-website version to a randomly selected group of your users, and the new-toolbar version to a
 second randomly selected group of users. You observe the sign-up rate for each group and conduct a statistical test which confirms that indeed, the new version &ldquo;causes&rdquo; more users to signup. You have increased
@@ -217,13 +224,16 @@ $$P(\theta|D) = \frac{P(D|\theta)P(\theta)}{P(D)}$$</p>
 <p>Lets say I want to check if a coin is fair. I observed $z$ heads in $N$ flips (this is the data).
 My prior is Beta distributed:<br>
 $$\begin{aligned}
-P(\theta) = \frac{\theta^{(a-1)}(1-\theta)^{(b-1)}}{B(a,b)} \quad, B(a,b) = \int_0^1 \theta^{a-1}(1-\theta)^{b-1}d\theta
-\end{aligned}$$
-And my Bernoulli likelihood of the outcome I just observed is $\theta^z(1-\theta)^{(N-z)}$. $\theta$ is the proportion of heads.<br>
+&amp;P(\theta) = \frac{\theta^{(a-1)}(1-\theta)^{(b-1)}}{B(a,b)} \\<br>
+&amp;B(a,b) = \int_0^1 \theta^{a-1}(1-\theta)^{b-1}d\theta
+\end{aligned}$$</p>
+<p>And my Bernoulli likelihood of the outcome I just observed is $\theta^z(1-\theta)^{(N-z)}$. $\theta$ is the proportion of heads.<br>
 Then by Bayes&rsquo; rule:<br>
 $$\begin{aligned}
-P(\theta|N, z) &amp;= \frac{P(N, z|\theta)P(\theta)}{P(N, z)} = \frac{\theta^z(1-\theta)^{(N-z)}\theta^{(a-1)}(1-\theta)^{(b-1)}}{B(a,b)P(N, z)} \\<br>
-&amp;= \frac{\theta^{((a+z)-1)}(1-\theta)^{((b+N-z)-1)}}{B(a+z,b+N-z)} \sim \textrm{Beta}(a+z,b+N-z)
+&amp;P(\theta|N, z) = \frac{P(N, z|\theta)P(\theta)}{P(N, z)} \\<br>
+&amp;= \frac{\theta^z(1-\theta)^{(N-z)}\theta^{(a-1)}(1-\theta)^{(b-1)}}{B(a,b)P(N, z)} \\<br>
+&amp;= \frac{\theta^{((a+z)-1)}(1-\theta)^{((b+N-z)-1)}}{B(a+z,b+N-z)} \\<br>
+&amp;\sim \textrm{Beta}(a+z,b+N-z)
 \end{aligned}$$</p>
 <p>The conclusion is that we see that the update process is as simple as adding the number of heads we observed to $a$ and the number of tails we observed to $b$ - that&rsquo;s it. This is what we will do in our procedure as well - e.g., if we observe 10 sign-ups we will add this number to our prior (Beta) distribution&rsquo;s $a$ parameter and the same for non sign-ups for $b$.</p>
 <h3 id="python-simulation">Python Simulation</h3>
@@ -353,9 +363,6 @@ Finally, we&rsquo;ve constructed a simple simulation to illustrate these ideas.<
 
         
 
-<link rel="stylesheet" type="text/css" href="/css/katex.min.css" crossorigin="anonymous">
-<script type="text/javascript" src="/js/katex.min.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/js/auto-render.min.js"onload="renderMathInElement(document.body);" crossorigin="anonymous"></script>
 
         </div>
         <footer class="footer-mobile">
