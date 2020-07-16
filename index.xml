@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>Understanding The MCMC Algorithm - Part 1</title>
+      <link>/2020/07/15/mcmc_part1/</link>
+      <pubDate>Wed, 15 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/07/15/mcmc_part1/</guid>
+      <description>In this next series of posts I will try to explain the ideas behind the Markov Chain Monte Carlo (MCMC) algorithms used in computer softwares and packages in order to compute the posterior distribution when using bayesian methods.</description>
+    </item>
+    
+    <item>
       <title></title>
       <link>/archives/</link>
       <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>

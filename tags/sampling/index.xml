@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Oren&#39;s ML Lounge</title>
-    <link>/post/</link>
-    <description>Recent content in Posts on Oren&#39;s ML Lounge</description>
+    <title>sampling on Oren&#39;s ML Lounge</title>
+    <link>/tags/sampling/</link>
+    <description>Recent content in sampling on Oren&#39;s ML Lounge</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 15 Jul 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/sampling/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -18,15 +18,6 @@
       
       <guid>/2020/07/15/mcmc_part1/</guid>
       <description>In this next series of posts I will try to explain the ideas behind the Markov Chain Monte Carlo (MCMC) algorithms used in computer softwares and packages in order to compute the posterior distribution when using bayesian methods.</description>
-    </item>
-    
-    <item>
-      <title>Solving The Multi-Armed Bandit Problem with Thompson Sampling</title>
-      <link>/2020/04/27/mab_thompson/</link>
-      <pubDate>Mon, 27 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/2020/04/27/mab_thompson/</guid>
-      <description>Imagine that you are a data scientist working for a company that offers some sort of service by subscription.</description>
     </item>
     
   </channel>

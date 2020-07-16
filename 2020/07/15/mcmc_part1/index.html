@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no"/>
+
+    <title>Understanding The MCMC Algorithm - Part 1 | Oren&#39;s ML Lounge</title>
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#FF3DB4">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    
+    
+    <link rel="stylesheet" href="/css/main.min.15431d6c334f65809fe2bc329da3f2c81c6e3027ab1e25b56afb2bb85fa7fd64.css"/>
+
+    
+    
+    
+
+    
+    
+    <script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+  });
+  MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+
+  MathJax.Hub.Config({
+  
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+</script>
+    </head>
+
+    <body>
+        
+<nav>
+  <header>
+    <div class="site-title">
+        <a href="/">Oren&#39;s ML Lounge</a>
+    </div> 
+    <link rel="shortcut icon" href="/favicon.ico"> 
+</header>
+  <div class="nav-menu">
+  
+    <a class="color-link nav-link" href="/about/">About</a>
+  
+    <a class="color-link nav-link" href="/tags/">Tags</a>
+  
+    <a class="color-link nav-link" href="/archives/">Archives</a>
+  
+  <a class="color-link nav-link" href="/index.xml" target="_blank" rel="noopener" type="application/rss+xml">RSS</a>
+</div>
+<footer class="footer">
+	<div class="social-icons">
+        
+
+    
+
+    
+    <a class="social-icon" href="https://twitter.com/oepshtain" target="_blank" rel="noopener" title="Twitter">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M8.991284,24.971612 C19.180436,24.971612 24.752372,16.530224 24.752372,9.210524 C24.752372,8.970656 24.747512,8.731868 24.736496,8.494376 C25.818008,7.712564 26.758256,6.737 27.5,5.62622 C26.507372,6.067076 25.439252,6.364292 24.318752,6.498212 C25.462472,5.812628 26.340512,4.727444 26.754584,3.434036 C25.684088,4.068536 24.499004,4.53002 23.23724,4.778528 C22.226468,3.701876 20.786828,3.028388 19.193828,3.028388 C16.134404,3.028388 13.653536,5.509256 13.653536,8.567492 C13.653536,9.0023 13.702244,9.424904 13.797176,9.830552 C9.19346,9.599108 5.11106,7.39472 2.3792,4.04294 C1.903028,4.861364 1.629032,5.812628 1.629032,6.827072 C1.629032,8.74904 2.606972,10.445612 4.094024,11.438132 C3.185528,11.41016 2.331788,11.160464 1.585184,10.745096 C1.583888,10.768208 1.583888,10.791428 1.583888,10.815728 C1.583888,13.49888 3.493652,15.738584 6.028088,16.246508 C5.562932,16.373084 5.07326,16.44134 4.56782,16.44134 C4.210988,16.44134 3.863876,16.406024 3.526484,16.34144 C4.231724,18.542264 6.276596,20.143796 8.701412,20.18894 C6.805148,21.674696 4.416836,22.56008 1.821488,22.56008 C1.374476,22.56008 0.93362,22.534592 0.5,22.4834 C2.951708,24.054476 5.862524,24.971612 8.991284,24.971612"></path>
+        </svg>
+    </a>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <a class="social-icon" href="https://www.linkedin.com/in/orenepshtain/" target="_blank" rel="noopener" title="LinkedIn">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M2,3.654102 C2,2.69908141 2.79442509,1.92397846 3.77383592,1.92397846 L24.2261641,1.92397846 C25.2058917,1.92397846 26,2.69908141 26,3.654102 L26,24.3462148 C26,25.3015521 25.2058917,26.0760215 24.2261641,26.0760215 L3.77383592,26.0760215 C2.79442509,26.0760215 2,25.3015521 2,24.3465315 L2,3.65378524 L2,3.654102 Z M9.27526132,22.1415901 L9.27526132,11.2356668 L5.65030092,11.2356668 L5.65030092,22.1415901 L9.27557808,22.1415901 L9.27526132,22.1415901 Z M7.46341463,9.74691162 C8.72727273,9.74691162 9.51409566,8.90940767 9.51409566,7.86284447 C9.49033893,6.79252455 8.72727273,5.97846056 7.48748812,5.97846056 C6.24675325,5.97846056 5.43649034,6.79252455 5.43649034,7.86284447 C5.43649034,8.90940767 6.22299652,9.74691162 7.4396579,9.74691162 L7.46309788,9.74691162 L7.46341463,9.74691162 Z M11.2815965,22.1415901 L14.9062401,22.1415901 L14.9062401,16.0519481 C14.9062401,15.7263225 14.9299968,15.4000634 15.0256573,15.1675641 C15.2876148,14.5159962 15.8840672,13.8416218 16.8856509,13.8416218 C18.1970225,13.8416218 18.7218879,14.8416218 18.7218879,16.3078872 L18.7218879,22.1415901 L22.3465315,22.1415901 L22.3465315,15.8885017 C22.3465315,12.5388027 20.5584416,10.9800443 18.1735825,10.9800443 C16.2182452,10.9800443 15.3595185,12.072854 14.8824834,12.8172315 L14.9065569,12.8172315 L14.9065569,11.2359835 L11.2819132,11.2359835 C11.3291099,12.2591067 11.2815965,22.1419069 11.2815965,22.1419069 L11.2815965,22.1415901 Z"></path>
+        </svg>
+    </a>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <a class="social-icon" href="https://github.com/oren0e" target="_blank" rel="noopener" title="GitHub">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M13.9988029,1.32087331 C6.82105037,1.32087331 1,7.14112562 1,14.3212723 C1,20.0649109 4.72454649,24.9370678 9.89038951,26.6560892 C10.5408085,26.7757983 10.7778323,26.374374 10.7778323,26.0296121 C10.7778323,25.7215609 10.7666595,24.9035493 10.760275,23.8189856 C7.14426471,24.6042767 6.38131925,22.0760223 6.38131925,22.0760223 C5.78995672,20.5740732 4.93762853,20.1742451 4.93762853,20.1742451 C3.75729765,19.3682044 5.02701126,19.3841656 5.02701126,19.3841656 C6.33183953,19.4759425 7.01817121,20.7241085 7.01817121,20.7241085 C8.17775254,22.7104801 10.0611744,22.1366749 10.8017741,21.8038838 C10.919887,20.9643246 11.2558703,20.3913175 11.6269683,20.066507 C8.74038491,19.7385043 5.70536235,18.6228163 5.70536235,13.6413251 C5.70536235,12.2223743 6.21213051,11.0611968 7.04370914,10.1530044 C6.90963504,9.82420367 6.46351945,8.50181809 7.17139875,6.71256734 C7.17139875,6.71256734 8.26234691,6.36301702 10.7459099,8.04532771 C11.78259,7.75642995 12.8950858,7.61277914 14.000399,7.60719272 C15.1049142,7.61277914 16.2166119,7.75642995 17.2548881,8.04532771 C19.736855,6.36301702 20.8262071,6.71256734 20.8262071,6.71256734 C21.5356825,8.50181809 21.0895669,9.82420367 20.9562909,10.1530044 C21.7894656,11.0611968 22.2922435,12.2223743 22.2922435,13.6413251 C22.2922435,18.6355852 19.2524325,19.734514 16.3570705,20.0561322 C16.8231376,20.4575564 17.2389269,21.2508282 17.2389269,22.4638795 C17.2389269,24.2012564 17.2229657,25.603448 17.2229657,26.0296121 C17.2229657,26.3775663 17.4575954,26.7821827 18.116793,26.6552912 C23.2786458,24.9322794 27,20.0633148 27,14.3212723 C27,7.14112562 21.1789496,1.32087331 13.9988029,1.32087331"></path>
+        </svg>
+    </a>
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+</div>
+
+
+
+
+
+	<script src="/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
+</footer>
+</nav>
+
+        <div id="content" class="content-container">
+        
+
+<h1 class="post-title">Understanding The MCMC Algorithm - Part 1</h1>
+    
+    <time>July 15, 2020</time>
+    
+    <div>
+        <p>
+        <p>In this next series of posts I will try to explain the ideas behind the Markov Chain Monte Carlo (MCMC) algorithms used in computer softwares and packages in order to compute the posterior distribution when using bayesian methods. I have learned about it by reading a great book by John K. Kruschke which can be found in <a href="https://www.amazon.com/Doing-Bayesian-Data-Analysis-Tutorial/dp/0124058884">this link</a>.<br>
+This part will focus on the intuition and the main ideas underlying the Metropolis algorithm which is one algorithm of a larger family of MCMC algorithms. In future posts I intend to build on that intuition to explain additional material related to the use of MCMC in practice, let&rsquo;s begin!</p>
+<h2 id="the-bayesian-framework-and-why-do-we-need-mcmc">The Bayesian Framework And Why Do We Need MCMC?</h2>
+<p>In bayesian methods we assume something about the world and then use data to update our assumptions. So if there is a stream of data that we want to estimate its generating mechanism, i.e., the &ldquo;function&rdquo; that created this stream of data, we need to make an initial assumption about this &ldquo;function&rdquo; first, this is called our <strong>prior</strong> beliefs. Once we have our prior stated we proceed to observe the data and then update our priors accordingly. In the frequentist world view - this generating &ldquo;function&rdquo; has the same parameters each and every time it runs, in the bayesian world view the function&rsquo;s parameters are random variables, i.e., they have a probability distribution. Bayes rule states that we can infer the distribution of the parameters $\theta$ of this &ldquo;function&rdquo; with the help of the data we observe $D$.
+$$P(\theta|D) = \frac{P(D|\theta)P(\theta)}{P(D)}$$</p>
+<p>where $P(\theta|D)$ is called the <strong>posterior</strong>, i.e., our updated-by-data beliefs, $P(D|\theta)$ is called the <strong>likelihood</strong> and it represents the likelihood of the data given our beliefs. $P(\theta)$ is the <strong>prior</strong>. Finally, $P(D)$ represents the probability of the data over all possible beliefs, and it is usually thought of as a normalizing constant.</p>
+<p>Calculating $P(D)$ requires us to compute the integral over all possible beliefs. In real applications this can be a very hard thing to do. In my <a href="https://oren0e.github.io/2020/04/27/mab_thompson/">previous post</a> I wrote about conjugate priors and <a href="https://oren0e.github.io/2020/04/27/mab_thompson/#mathematical-proof-for-beta-distribution-being-conjugate-prior-to-bernoulli-outcome">how easy</a> it is then to calculate the posterior in a closed form using such priors. In real life applications it is rarely the case.</p>
+<p>If we have only one parameter with a finite range to estimate, we can try to approximate the integral by grid approximation, but what if we have several parameters (which is the more common case)? In these situations we won&rsquo;t be able to span the parameter space with a reasonable number of points. For illustration, let&rsquo;s say we have six parameters that we want to estimate. The parameter space is then 6-dimensional that involves the joint distribution of all combinations of those six parameters&rsquo; values. Setting a grid that will cover $1000$ different values per parameter will involve $1000^6$ combinations of parameter values, a number that is too large for any computer to evaluate in a reasonable time. What can we do instead?</p>
+<h2 id="motivating-example-the-island-hopping-politician">Motivating Example: The Island Hopping Politician</h2>
+<p>Suppose that there is an elected politician that lives on a long chain of islands. The politician wants to keep his influence and status on each island, so during his day he hops from one island to the next. The population on each island is different - there are islands with a lot of people on them and there are islands with less people on them. The politician is not stupid, he wants to visit the more populated islands more frequently so that he spends the most time on the most populated islands, and proportionally less time on the less populated islands.</p>
+<p>But he has a problem: Despite he was elected, he doesn&rsquo;t know how many people are there on each island, and he doesn&rsquo;t even know how many islands there are. However, he has a group of advisors who have some minimal information gathering capabilities. When they are free of eating and drinking, they can ask the mayor of the island they are on how many people are on the island. And when the politician proposes to visit an adjacent island, they can ask the mayor of that island how many people are on that island.</p>
+<p>The politician has a simple heuristic for deciding whether to go to the proposed island: First, he flips a (fair) coin to decide whether to visit the adjacent island to the right (east) or the adjacent island to the left (west), once he has a proposal he needs to decide whether to actually accept it. If the proposed island has a larger population than the island he is currently on, he definitely will go there. If, on the other hand, the proposed island has a smaller population than the one that he is currently on, he will go there in a &ldquo;probabilistic&rdquo; way. So for example, if the population on the proposed island is only half as big as the population on the island he is currently on, the probability he will go there is only 50%.</p>
+<p>More formally, let us denote the population of the proposed island as $P_{\textrm{proposed}}$ and the population of the current island as $P_{\textrm{current}}$. The politician will move to the less populated island with probability $p_{\textrm{move}} = P_{\textrm{proposed}} / P_{\textrm{current}}$. The politician is not a robot of course so he needs a device that will help him to come up with this probabilistic move, this is why he does this move by spinning a fair spinner marked on its circumference with uniform values from zero to one. If the pointed-to value is between zero and $p_{\textrm{move}}$, then he moves.</p>
+<h3 id="a-random-walk">A Random Walk</h3>
+<p>Suppose there are 7 islands which are indexed by the value of $\theta$, so the leftmost island is $\theta = 1$ and the rightmost island is $\theta = 7$. The relative population on each island is increasing with $\theta$ so $P(\theta) = \theta$. The uppercase $P()$ in this setting means <em>relative</em> population and not absolute and also not the probability mass. In simple words, the rightmost island has the largest population relative to the other islands, and the leftmost island has the lowest population relative to the other islands. You can think about other islands to the left of 1 and to the right of 7 as all having 0 populations. The politician can propose to jump to those islands, but the proposal will always be rejected because the population on those islands will always be lower (it&rsquo;s 0!) than of the island he is currently on. We can rewrite the formula of $p_{\textrm{move}}$ to be
+$$ p_{\textrm{move}} = \min\left(\frac{P(\theta_{\textrm{proposed}})}{P(\theta_{\textrm{current}})},1\right)$$
+So when $P_{\textrm{proposed}} &gt; P_{\textrm{current}}$ then $p_{\textrm{move}} = 1$.</p>
+<p>In order to illustrate the mechanism let&rsquo;s say our politician starts on island number 4. He flips a coin in order to decide which direction to go - left, to island number 3, or right, to island number 5. The probability to go to island 5 is 0.5 because if it is chosen the politician will go there with probability of 1 because of the increasing nature of the populations&rsquo; relative quantity in our problem, i.e., $P(\theta = 5) &gt; P(\theta = 4)$. So when a right move is proposed it is always accepted (except the edge case of populations zero as been discussed above). However, The probability to go to the left, to island 3, is equal to $0.5\times\frac{P(\theta = 3)}{P(\theta = 4)} = 0.5\times3/4 = 0.375$. If the proposal to go to the left is not accepted the politician just stays in the current island, in this case island number 4. This can happen with probability $0.5\times(1 - 3/4) = 0.125$.</p>
+<p>The above process continues and the probabilities continue to be computed the same way at every time step. When we have a long enough record of where the politician has been, we can approximate the islands&rsquo; populations ($\theta = 1$ to $\theta = 7$) distribution by counting the relative number of times that the politician visited each island.</p>
+<h3 id="proposed-algorithm">Proposed Algorithm</h3>
+<p>Here is a summary of our algorithm for moving from one island to the next.
+We are currently at position $\theta_{\textrm{current}}$, we then propose to move one position either to the right or to the left. We choose this by flipping a coin (with a 50-50 chance). The range of possible proposed moves, and the probability of proposing each, is called the _proposal distribution_. In our example this distribution is a simple one with only two values of 50% each.</p>
+<p>After we proposed a move, we then decide whether to accept it or not. The acceptance decision is based on the value of the <em>target distribution</em> at the proposed position, relative to the value of the target distribution at our current position. In our example, the target distribution is the unknown distribution of the population across the islands. If the value of the target distribution is greater at the proposed position than in our current position - we move to the proposed position with probability of 1. We definitely want to go higher when we can. On the other hand, if the current position has greater value than the value at the proposed position, we move to the proposed position probabilistically - we move to the position with probability $p_{\textrm{move}} = P_{\textrm{proposed}} / P_{\textrm{current}}$ where $P(\theta)$ is the value of the target distribution at $\theta$. Notice that what matters for the choice whether to move or not is the ratio $P_{\textrm{proposed}} / P_{\textrm{current}}$ and not the absolute magnitude of $P(\theta)$. Thus, as we can see, $P(\theta)$ does not need to be normalized, which means it does not need to sum to 1 as a probability distribution must. In our example of the politician, the target distribution is the population of each island, not a normalized probability.</p>
+<p>After proposing a move by sampling from the proposal distribution and after determining the probability with which we will accept the move, we then actually accept or reject a move by sampling a value from a uniform distribution over the interval [0,1]. If the sampled value is between 0 and $p_{\textrm{move}}$ then we make the move. Otherwise, we reject the move and stay in our current position. We repeat the process at the next time step.</p>
+<h3 id="how-is-this-helping-us">How Is This Helping Us?</h3>
+<p>In the proposed algorithm we are required to be able to do several things:</p>
+<ul>
+<li>Generate a random value from the proposal distribution to get $\theta_{\textrm{proposed}}$.</li>
+<li>Evaluate the target distribution at any given position to compute the ratio $P_{\textrm{proposed}} / P_{\textrm{current}}$.</li>
+<li>Generate a random value from the uniform distribution to accept or reject the proposal according to $p_{\textrm{move}}$.</li>
+</ul>
+<p>By being able to do those 3 things we are able to do, indirectly, something that we could not do before (directly) which is to generate samples from the target distribution. Moreover, we can do this even when the target distribution is not normalized.</p>
+<p>When we look at the target distribution $P(\theta)$ as the posterior proportional to $P(D|\theta)P(\theta)$ (look at the formula for bayes rule at the beginning), we can generate random representative values from the posterior distribution merely by evaluating $P(D|\theta)P(\theta)$ (the likelihood times the prior), without normalizing it by $P(D)$, which is what we wanted all along.</p>
+<h4 id="mcmc-terminology">MCMC: Terminology</h4>
+<p>To make things clear, in this post we are talking about the <em>Metropolis</em> algorithm which is named after the first author of the paper that first presented it <a href="https://www.osti.gov/servlets/purl/4390578">(Metropolis, Rosenbluth, Rosenbluth, Teller, Teller, 1953)</a>. This algorithm is part of a larger family of algorithms that are called Markov Chain Monte Carlo (MCMC).</p>
+<p>When we generate representative random values from a target distribution we perform a case of Monte Carlo simulation. Any simulation that samples a lot of random values from a distribution is called a Monte Carlo simulation, named after the dice and spinners and shufflings of the famous Monte Carlo casino. The naming of such methods as Monte Carlo is attributed to the mathematicians Stanislaw Ulam and the great John von Neumann.</p>
+<p>The Metropolis algorithm also generates random walks such that each step in the walk is completely independent of the steps before the current position. Any such process in which each step has no memory for states before the current one is called a (first order) <em>Markov</em> process, and a succession of such steps is called a <em>Markov chain</em>, named after the mathematician Andrey Markov.</p>
+<h3 id="island-hopping-politician-code-example">Island Hopping Politician Code Example</h3>
+<p>Let&rsquo;s simulate the politician example in Python. The full code is available in this <a href="https://github.com/oren0e/mcmc-blog">Github repo</a> which will contain all other code examples in this series of posts as well.</p>
+<p>First, lets create the real island distribution.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">matplotlib.pyplot</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">plt</span>
+
+<span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">random</span>
+
+<span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">typing</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">List</span>
+
+<span style="color:#000">MAX_ISLAND</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">7</span>
+<span style="color:#000">SEED</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">101</span>
+
+<span style="color:#8f5902;font-style:italic"># real theta (the islands)</span>
+<span style="color:#000">real_theta</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">MAX_ISLAND</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)]</span>
+</code></pre></div><img src="/islands_real.png" style="max-width:100%">
+<p>As was detailed in the example above, each island to the right has a greater value of the target distribution than the current island. The plot does not show the conceptual islands to the right of island 7 and to the left of island 1, but they are being accounted for in the code, as we shall see (their population is 0 so they will always be rejected).</p>
+<p>Next, we define the function <code>run_mcmc()</code> that will run the random-walk simulation.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">run_mcmc</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">rounds</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">seed</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">islands</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">])</span> <span style="color:#ce5c00;font-weight:bold">-&gt;</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]:</span>
+    <span style="color:#4e9a06">&#39;&#39;&#39;
+</span><span style="color:#4e9a06">    Runs the random-walk simulation `rounds` times
+</span><span style="color:#4e9a06">    and returns the resulting posterior distribution
+</span><span style="color:#4e9a06">    &#39;&#39;&#39;</span>
+    <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">seed</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">seed</span><span style="color:#000;font-weight:bold">)</span>
+
+    <span style="color:#000">current</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">choice</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">islands</span><span style="color:#000;font-weight:bold">)</span>   <span style="color:#8f5902;font-style:italic"># start somewhere</span>
+    <span style="color:#000">proposal</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+    <span style="color:#000">n</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">len</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">islands</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">posterior</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#0000cf;font-weight:bold">0</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">_</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">n</span><span style="color:#000;font-weight:bold">)]</span>
+    <span style="color:#000">round_count</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+
+    <span style="color:#204a87;font-weight:bold">while</span> <span style="color:#000">round_count</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#000">rounds</span><span style="color:#000;font-weight:bold">:</span>
+        <span style="color:#8f5902;font-style:italic"># determine which direction to take</span>
+        <span style="color:#000">proposal_string</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">str</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">choice</span><span style="color:#000;font-weight:bold">([</span><span style="color:#4e9a06">&#39;left&#39;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#4e9a06">&#39;right&#39;</span><span style="color:#000;font-weight:bold">])</span>
+        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">proposal_string</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;right&#39;</span><span style="color:#000;font-weight:bold">:</span>
+            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span>
+        <span style="color:#204a87;font-weight:bold">elif</span> <span style="color:#000">proposal_string</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;left&#39;</span><span style="color:#000;font-weight:bold">:</span>
+            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#0000cf;font-weight:bold">1</span>
+
+        <span style="color:#8f5902;font-style:italic"># condition for edge cases</span>
+        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">n</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">or</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+
+        <span style="color:#000">p_move</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">float</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">min</span><span style="color:#000;font-weight:bold">((</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">/</span> <span style="color:#000">current</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000">roulette</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">float</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">uniform</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">roulette</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">roulette</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#000">p_move</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">proposal</span>
+        <span style="color:#000">posterior</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#0000cf;font-weight:bold">1</span>
+
+        <span style="color:#000">round_count</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#0000cf;font-weight:bold">1</span>
+
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">posterior</span>
+</code></pre></div><p>Notice that if somehow the proposal is greater than the last island or smaller than the first island, then it is set to zero.<br>
+We count the number of times we visit each island by adding 1 at the relevant index position in the posterior list. This is true even if we stay at the same island (we just add 1 to the current island).</p>
+<p>The following plots show the posterior for different number of rounds.</p>
+<img src="/posterior_100_rounds.png" style="max-width:100%">
+<img src="/posterior_200_rounds.png" style="max-width:100%">
+<img src="/posterior_500_rounds.png" style="max-width:100%">
+<img src="/posterior_1000_rounds.png" style="max-width:100%">  
+<p>We see that after 1000 rounds, the posterior has converged closely enough to the real distribution.</p>
+<h2 id="mcmc-more-generally">MCMC More Generally</h2>
+<p>In the previous sections we described a special case of the MCMC algorithm that made it easy to understand how does it work. We considered the simple case of discrete positions (e.g. number of islands), one dimension, and moves that proposed just one position to the left or right.<br>
+The general algorithm applies to continuous values, multiple dimensions, and with more general proposal distributions.</p>
+<p>The essentials of the algorithm are still the same. We have some posterior distribution, i.e. target distribution, $P(\theta)$, over a multidimensional continuous parameter space from which we would like to generate representative sample values. As before, we must be able to compute the value of $P(\theta)$ for any value of $\theta$. The distribution does not need to be normalized, it just needs to be nonnegative.</p>
+<p>We generate sample values from the target distribution in the same way as before, i.e., by a random walk through the parameter space. We start at a random point which should be somewhere where $P(\theta)$ is nonzero. The random walk progresses at each step by proposing a move to a new position in the parameter space and then deciding whether to accept or reject the move. Proposal distributions can take many forms with the goal being to choose a distribution that explores the regions of the parameter space where $P(\theta)$ has most of its mass. In addition, we need to choose such a proposal distribution for which we have a quick way to generate random values.</p>
+<p>After a new proposed position has been generated, the algorithm then decides whether or not to accept the proposal. The decision rule is the same - take the minimum of $P_{\textrm{proposed}} / P_{\textrm{current}}$ and 1 to get $p_{\textrm{move}}$. We then generate a random number from the uniform distribution on the interval [0,1]. If the random number is between 0 and $p_{\textrm{move}}$, the move is accepted. This process repeats itself, and in the long run, the positions visited by the random walk will closely approximate the target distribution (the posterior).</p>
+<h3 id="mcmc-applied-to-bernoulli-likelihood-and-beta-prior">MCMC Applied to Bernoulli Likelihood and Beta Prior</h3>
+<p>Before wrapping up, I want us to take a look at another more &ldquo;realistic&rdquo; example of coin flipping. I have written about this example in the context of Multi Armed Bandit algorithms in <a href="https://oren0e.github.io/2020/04/27/mab_thompson/">this post</a>.</p>
+<p>In the previous island-hopping-politician example, the islands represented candidate parameter values, and the populations represented relative posterior probabilities. In this example of coin flipping where we are interested to find the underlying probability of the coin landing on heads, the parameter $\theta$ has values that range on a continuum from zero to one, and the relative posterior probability (the target distribution) is computed as likelihood times the prior.</p>
+<p>When applying the Metropolis algorithm to this example we can think of the parameter values dimension as a dense chain of infinitesimal islands, and of the relative population of each infinitesimal island as its relative posterior probability density. Also, instead of being able to move just to the adjacent islands to the current position, the proposed move can be to islands farther away from the current island.</p>
+<p>We will need a proposal distribution that will let us visit any parameter value on the continuum. We will use the normal distribution. The idea behind using the normal distribution is that the proposed move will typically be near the current position, and the probability of proposing a more distant position will drop off according to the normal (bell) curve. The magnitude of the standard deviation will highly affect the likelihood of a move to a distant position.</p>
+<h4 id="flipping-a-coin">Flipping a Coin</h4>
+<p>We flip a coin $N$ times and observe $z$ heads, this is our data. We will use the Bernoulli likelihood:
+$$\begin{aligned}
+p(D|\theta) = p(z,N|\theta) = \theta^z(1-\theta)^{N-z}
+\end{aligned}$$
+We start with a beta prior $p(\theta) = \textrm{beta}(\theta|a,b)$ (for reading more about using the beta distribution as the prior read my <a href="https://oren0e.github.io/2020/04/27/mab_thompson/">previous post</a>). For the proposal distribution we will use the normal distribution with mean 0 and standard deviation (SD) denoted as $\sigma$. The proposed jump will be denoted as $\Delta\theta \sim N(0,\sigma)$ which means that it will be randomly sampled from the normal distribution. Thus, the proposed jump will be usually close to the current position, because the mean jump is zero. The proposed jump can be positive or negative, with larger magnitudes less likely than smaller magnitudes (governed by $\sigma$). The current parameter value is $\theta_c$ and the proposal parameter is $\theta_p = \theta_c + \Delta\theta$.</p>
+<p>We then apply the Metropolis algorithm as follows: First, we start at an arbitrary initial value of $\theta$, in a valid range of course. This becomes the current value $\theta_c$. Then:</p>
+<ol>
+<li>We randomly generate a proposal jump $\Delta\theta \sim N(0,\sigma)$ and denote the proposed value as $\theta_p = \theta_c + \Delta\theta$.</li>
+<li>Compute $p_{\textrm{move}}$, the probability of moving to the proposed value
+$$\begin{aligned}
+&amp;p_{\textrm{move}} = \min\left(1, \frac{P(\theta_p)}{P(\theta_c)} \right) \\ &amp;= \min\left(1, \frac{p(D|\theta_p)p(\theta_p)}{p(D|\theta_c)p(\theta_c)} \right)\\<br>
+&amp;= \min\left(1, \frac{\textrm{Bernoulli}(z, N|\theta_p)\textrm{beta}(\theta_p|a,b)}{\textrm{Bernoulli}(z, N|\theta_c)\textrm{beta}(\theta_c|a,b)} \right) \\<br>
+&amp;= \ldots
+\end{aligned}$$
+The last line is just replacing the relevant parts with the specific Bernoulli likelihood and beta distribution formulas.<br>
+Like we&rsquo;ve seen in the Python example, if the proposed value $\theta_p$ happens to land outside of the permissible bounds of $\theta$, the prior and/or the likelihood is set to zero, hence $p_{\textrm{move}}$ will be zero.</li>
+<li>Accept the proposed parameter value if a random value sampled from a [0,1] uniform distribution is less than $p_{\textrm{move}}$, otherwise reject the proposal parameter value and count the current value again.</li>
+</ol>
+<p>We repeat the above steps until we see that a sufficiently representative sample has been generated. The issue of judging whether a sufficiently representative sample has been reached is not trivial and I hope to address this in part 2 of this series.</p>
+<p>At the end of this process we should get the posterior distribution with it (hopefully) being a close representative of the underlying true distribution of the probability of heads.</p>
+<h2 id="summary">Summary</h2>
+<p>In this post I tried to explain the main intuition behind the MCMC algorithms, specifically the Metropolis algorithm.<br>
+The problem with all bayesian inference methods lies in the difficulty to compute the integral of the normalizing factor in the bayes rule formula. The MCMC family of algorithms solve this difficulty by generating a representative sample of the posterior distribution.<br>
+In future posts of this series I intend to write more about further issues of the Metropolis algorithm and to present a new MCMC algorithm called Gibbs sampling. Thanks for reading!</p>
+
+        </p>
+    </div>
+    
+
+    
+
+    <div class="page-footer">
+        
+        <hr class="footer-divider">
+        
+            <a class="tag" href="/tags/sampling">#sampling</a>
+        
+            <a class="tag" href="/tags/bayes">#bayes</a>
+        
+            <a class="tag" href="/tags/mcmc">#MCMC</a>
+        
+      
+    </div>
+
+
+        
+
+
+        </div>
+        <footer class="footer-mobile">
+	<div class="social-icons">
+        
+
+    
+
+    
+    <a class="social-icon" href="https://twitter.com/oepshtain" target="_blank" rel="noopener" title="Twitter">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M8.991284,24.971612 C19.180436,24.971612 24.752372,16.530224 24.752372,9.210524 C24.752372,8.970656 24.747512,8.731868 24.736496,8.494376 C25.818008,7.712564 26.758256,6.737 27.5,5.62622 C26.507372,6.067076 25.439252,6.364292 24.318752,6.498212 C25.462472,5.812628 26.340512,4.727444 26.754584,3.434036 C25.684088,4.068536 24.499004,4.53002 23.23724,4.778528 C22.226468,3.701876 20.786828,3.028388 19.193828,3.028388 C16.134404,3.028388 13.653536,5.509256 13.653536,8.567492 C13.653536,9.0023 13.702244,9.424904 13.797176,9.830552 C9.19346,9.599108 5.11106,7.39472 2.3792,4.04294 C1.903028,4.861364 1.629032,5.812628 1.629032,6.827072 C1.629032,8.74904 2.606972,10.445612 4.094024,11.438132 C3.185528,11.41016 2.331788,11.160464 1.585184,10.745096 C1.583888,10.768208 1.583888,10.791428 1.583888,10.815728 C1.583888,13.49888 3.493652,15.738584 6.028088,16.246508 C5.562932,16.373084 5.07326,16.44134 4.56782,16.44134 C4.210988,16.44134 3.863876,16.406024 3.526484,16.34144 C4.231724,18.542264 6.276596,20.143796 8.701412,20.18894 C6.805148,21.674696 4.416836,22.56008 1.821488,22.56008 C1.374476,22.56008 0.93362,22.534592 0.5,22.4834 C2.951708,24.054476 5.862524,24.971612 8.991284,24.971612"></path>
+        </svg>
+    </a>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <a class="social-icon" href="https://www.linkedin.com/in/orenepshtain/" target="_blank" rel="noopener" title="LinkedIn">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M2,3.654102 C2,2.69908141 2.79442509,1.92397846 3.77383592,1.92397846 L24.2261641,1.92397846 C25.2058917,1.92397846 26,2.69908141 26,3.654102 L26,24.3462148 C26,25.3015521 25.2058917,26.0760215 24.2261641,26.0760215 L3.77383592,26.0760215 C2.79442509,26.0760215 2,25.3015521 2,24.3465315 L2,3.65378524 L2,3.654102 Z M9.27526132,22.1415901 L9.27526132,11.2356668 L5.65030092,11.2356668 L5.65030092,22.1415901 L9.27557808,22.1415901 L9.27526132,22.1415901 Z M7.46341463,9.74691162 C8.72727273,9.74691162 9.51409566,8.90940767 9.51409566,7.86284447 C9.49033893,6.79252455 8.72727273,5.97846056 7.48748812,5.97846056 C6.24675325,5.97846056 5.43649034,6.79252455 5.43649034,7.86284447 C5.43649034,8.90940767 6.22299652,9.74691162 7.4396579,9.74691162 L7.46309788,9.74691162 L7.46341463,9.74691162 Z M11.2815965,22.1415901 L14.9062401,22.1415901 L14.9062401,16.0519481 C14.9062401,15.7263225 14.9299968,15.4000634 15.0256573,15.1675641 C15.2876148,14.5159962 15.8840672,13.8416218 16.8856509,13.8416218 C18.1970225,13.8416218 18.7218879,14.8416218 18.7218879,16.3078872 L18.7218879,22.1415901 L22.3465315,22.1415901 L22.3465315,15.8885017 C22.3465315,12.5388027 20.5584416,10.9800443 18.1735825,10.9800443 C16.2182452,10.9800443 15.3595185,12.072854 14.8824834,12.8172315 L14.9065569,12.8172315 L14.9065569,11.2359835 L11.2819132,11.2359835 C11.3291099,12.2591067 11.2815965,22.1419069 11.2815965,22.1419069 L11.2815965,22.1415901 Z"></path>
+        </svg>
+    </a>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <a class="social-icon" href="https://github.com/oren0e" target="_blank" rel="noopener" title="GitHub">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M13.9988029,1.32087331 C6.82105037,1.32087331 1,7.14112562 1,14.3212723 C1,20.0649109 4.72454649,24.9370678 9.89038951,26.6560892 C10.5408085,26.7757983 10.7778323,26.374374 10.7778323,26.0296121 C10.7778323,25.7215609 10.7666595,24.9035493 10.760275,23.8189856 C7.14426471,24.6042767 6.38131925,22.0760223 6.38131925,22.0760223 C5.78995672,20.5740732 4.93762853,20.1742451 4.93762853,20.1742451 C3.75729765,19.3682044 5.02701126,19.3841656 5.02701126,19.3841656 C6.33183953,19.4759425 7.01817121,20.7241085 7.01817121,20.7241085 C8.17775254,22.7104801 10.0611744,22.1366749 10.8017741,21.8038838 C10.919887,20.9643246 11.2558703,20.3913175 11.6269683,20.066507 C8.74038491,19.7385043 5.70536235,18.6228163 5.70536235,13.6413251 C5.70536235,12.2223743 6.21213051,11.0611968 7.04370914,10.1530044 C6.90963504,9.82420367 6.46351945,8.50181809 7.17139875,6.71256734 C7.17139875,6.71256734 8.26234691,6.36301702 10.7459099,8.04532771 C11.78259,7.75642995 12.8950858,7.61277914 14.000399,7.60719272 C15.1049142,7.61277914 16.2166119,7.75642995 17.2548881,8.04532771 C19.736855,6.36301702 20.8262071,6.71256734 20.8262071,6.71256734 C21.5356825,8.50181809 21.0895669,9.82420367 20.9562909,10.1530044 C21.7894656,11.0611968 22.2922435,12.2223743 22.2922435,13.6413251 C22.2922435,18.6355852 19.2524325,19.734514 16.3570705,20.0561322 C16.8231376,20.4575564 17.2389269,21.2508282 17.2389269,22.4638795 C17.2389269,24.2012564 17.2229657,25.603448 17.2229657,26.0296121 C17.2229657,26.3775663 17.4575954,26.7821827 18.116793,26.6552912 C23.2786458,24.9322794 27,20.0633148 27,14.3212723 C27,7.14112562 21.1789496,1.32087331 13.9988029,1.32087331"></path>
+        </svg>
+    </a>
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+</div>
+
+
+
+
+	<div class="footer-mobile-links">
+		<p><a href="https://github.com/kimcc/hugo-theme-noteworthy" target="_blank" rel="noopener">Noteworthy theme</a></p>
+		<span class="divider-bar">|</span>
+		<p><a href="https://gohugo.io" target="_blank" rel="noopener">Built with Hugo</a></p>
+	</div>
+
+	<script src="/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
+</footer>
+    </body>
+</html>
