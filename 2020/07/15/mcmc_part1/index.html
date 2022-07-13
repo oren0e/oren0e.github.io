@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="format-detection" content="telephone=no"/>
 
-    <title>Understanding The MCMC Algorithm - Part 1 | Oren&#39;s ML Lounge</title>
+    <title>Understanding The MCMC Algorithm - Part 1 | Oren&#39;s Blog</title>
     
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
@@ -19,7 +19,7 @@
     
     
     
-    <link rel="stylesheet" href="/css/main.min.15431d6c334f65809fe2bc329da3f2c81c6e3027ab1e25b56afb2bb85fa7fd64.css"/>
+    <link rel="stylesheet" href="/css/main.min.113b8750726301d2272b2fabf9695ed6bfe79dff4f4cd582cb3010010ebceea4.css"/>
 
     
     
@@ -62,7 +62,7 @@
 <nav>
   <header>
     <div class="site-title">
-        <a href="/">Oren&#39;s ML Lounge</a>
+        <a href="/">Oren&#39;s Blog</a>
     </div> 
     <link rel="shortcut icon" href="/favicon.ico"> 
 </header>
@@ -156,7 +156,7 @@
 
 
 
-	<script src="/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
+	<script src="/js/main.min.a7205ef73b078c8daed6fe1b0826e8ba229ffabbb69d299d9446cf41f2c7d8aa.js" integrity="sha256-pyBe9zsHjI2u1v4bCCbouiKf+ru2nSmdlEbPQfLH2Ko=" crossorigin="anonymous"></script>
 </footer>
 </nav>
 
@@ -190,7 +190,7 @@ So when $P_{\textrm{proposed}} &gt; P_{\textrm{current}}$ then $p_{\textrm{move}
 <p>The above process continues and the probabilities continue to be computed the same way at every time step. When we have a long enough record of where the politician has been, we can approximate the islands&rsquo; populations ($\theta = 1$ to $\theta = 7$) distribution by counting the relative number of times that the politician visited each island.</p>
 <h3 id="proposed-algorithm">Proposed Algorithm</h3>
 <p>Here is a summary of our algorithm for moving from one island to the next.
-We are currently at position $\theta_{\textrm{current}}$, we then propose to move one position either to the right or to the left. We choose this by flipping a coin (with a 50-50 chance). The range of possible proposed moves, and the probability of proposing each, is called the _proposal distribution_. In our example this distribution is a simple one with only two values of 50% each.</p>
+We are currently at position $\theta_{\textrm{current}}$, we then propose to move one position either to the right or to the left. We choose this by flipping a coin (with a 50-50 chance). The range of possible proposed moves, and the probability of proposing each, is called the <em>proposal distribution</em>. In our example this distribution is a simple one with only two values of 50% each.</p>
 <p>After we proposed a move, we then decide whether to accept it or not. The acceptance decision is based on the value of the <em>target distribution</em> at the proposed position, relative to the value of the target distribution at our current position. In our example, the target distribution is the unknown distribution of the population across the islands. If the value of the target distribution is greater at the proposed position than in our current position - we move to the proposed position with probability of 1. We definitely want to go higher when we can. On the other hand, if the current position has greater value than the value at the proposed position, we move to the proposed position probabilistically - we move to the position with probability $p_{\textrm{move}} = P_{\textrm{proposed}} / P_{\textrm{current}}$ where $P(\theta)$ is the value of the target distribution at $\theta$. Notice that what matters for the choice whether to move or not is the ratio $P_{\textrm{proposed}} / P_{\textrm{current}}$ and not the absolute magnitude of $P(\theta)$. Thus, as we can see, $P(\theta)$ does not need to be normalized, which means it does not need to sum to 1 as a probability distribution must. In our example of the politician, the target distribution is the population of each island, not a normalized probability.</p>
 <p>After proposing a move by sampling from the proposal distribution and after determining the probability with which we will accept the move, we then actually accept or reject a move by sampling a value from a uniform distribution over the interval [0,1]. If the sampled value is between 0 and $p_{\textrm{move}}$ then we make the move. Otherwise, we reject the move and stay in our current position. We repeat the process at the next time step.</p>
 <h3 id="how-is-this-helping-us">How Is This Helping Us?</h3>
@@ -209,55 +209,55 @@ We are currently at position $\theta_{\textrm{current}}$, we then propose to mov
 <h3 id="island-hopping-politician-code-example">Island Hopping Politician Code Example</h3>
 <p>Let&rsquo;s simulate the politician example in Python. The full code is available in this <a href="https://github.com/oren0e/mcmc-blog">Github repo</a> which will contain all other code examples in this series of posts as well.</p>
 <p>First, lets create the real island distribution.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">matplotlib.pyplot</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">plt</span>
-
-<span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">random</span>
-
-<span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">typing</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">List</span>
-
-<span style="color:#000">MAX_ISLAND</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">7</span>
-<span style="color:#000">SEED</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">101</span>
-
-<span style="color:#8f5902;font-style:italic"># real theta (the islands)</span>
-<span style="color:#000">real_theta</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">MAX_ISLAND</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)]</span>
-</code></pre></div><img src="/islands_real.png" style="max-width:100%">
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">matplotlib.pyplot</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">plt</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">random</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">typing</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">List</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000">MAX_ISLAND</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">7</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">SEED</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">101</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># real theta (the islands)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">real_theta</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">MAX_ISLAND</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)]</span>
+</span></span></code></pre></div><img src="/islands_real.png" style="max-width:100%">
 <p>As was detailed in the example above, each island to the right has a greater value of the target distribution than the current island. The plot does not show the conceptual islands to the right of island 7 and to the left of island 1, but they are being accounted for in the code, as we shall see (their population is 0 so they will always be rejected).</p>
 <p>Next, we define the function <code>run_mcmc()</code> that will run the random-walk simulation.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">run_mcmc</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">rounds</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">seed</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">islands</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">])</span> <span style="color:#ce5c00;font-weight:bold">-&gt;</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]:</span>
-    <span style="color:#4e9a06">&#39;&#39;&#39;
-</span><span style="color:#4e9a06">    Runs the random-walk simulation `rounds` times
-</span><span style="color:#4e9a06">    and returns the resulting posterior distribution
-</span><span style="color:#4e9a06">    &#39;&#39;&#39;</span>
-    <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">seed</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">seed</span><span style="color:#000;font-weight:bold">)</span>
-
-    <span style="color:#000">current</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">choice</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">islands</span><span style="color:#000;font-weight:bold">)</span>   <span style="color:#8f5902;font-style:italic"># start somewhere</span>
-    <span style="color:#000">proposal</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
-    <span style="color:#000">n</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">len</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">islands</span><span style="color:#000;font-weight:bold">)</span>
-    <span style="color:#000">posterior</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#0000cf;font-weight:bold">0</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">_</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">n</span><span style="color:#000;font-weight:bold">)]</span>
-    <span style="color:#000">round_count</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
-
-    <span style="color:#204a87;font-weight:bold">while</span> <span style="color:#000">round_count</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#000">rounds</span><span style="color:#000;font-weight:bold">:</span>
-        <span style="color:#8f5902;font-style:italic"># determine which direction to take</span>
-        <span style="color:#000">proposal_string</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">str</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">choice</span><span style="color:#000;font-weight:bold">([</span><span style="color:#4e9a06">&#39;left&#39;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#4e9a06">&#39;right&#39;</span><span style="color:#000;font-weight:bold">])</span>
-        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">proposal_string</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;right&#39;</span><span style="color:#000;font-weight:bold">:</span>
-            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span>
-        <span style="color:#204a87;font-weight:bold">elif</span> <span style="color:#000">proposal_string</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;left&#39;</span><span style="color:#000;font-weight:bold">:</span>
-            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#0000cf;font-weight:bold">1</span>
-
-        <span style="color:#8f5902;font-style:italic"># condition for edge cases</span>
-        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">n</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">or</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">):</span>
-            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
-
-        <span style="color:#000">p_move</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">float</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">min</span><span style="color:#000;font-weight:bold">((</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">/</span> <span style="color:#000">current</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
-        <span style="color:#000">roulette</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">float</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">uniform</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
-        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">roulette</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">roulette</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#000">p_move</span><span style="color:#000;font-weight:bold">):</span>
-            <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">proposal</span>
-        <span style="color:#000">posterior</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#0000cf;font-weight:bold">1</span>
-
-        <span style="color:#000">round_count</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#0000cf;font-weight:bold">1</span>
-
-    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">posterior</span>
-</code></pre></div><p>Notice that if somehow the proposal is greater than the last island or smaller than the first island, then it is set to zero.<br>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">run_mcmc</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">rounds</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">seed</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">islands</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">])</span> <span style="color:#ce5c00;font-weight:bold">-&gt;</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    Runs the random-walk simulation `rounds` times
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    and returns the resulting posterior distribution
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">seed</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">seed</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">current</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">choice</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">islands</span><span style="color:#000;font-weight:bold">)</span>   <span style="color:#8f5902;font-style:italic"># start somewhere</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">proposal</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">n</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">len</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">islands</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">posterior</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">List</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87">int</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#0000cf;font-weight:bold">0</span> <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">_</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">n</span><span style="color:#000;font-weight:bold">)]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">round_count</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">int</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">while</span> <span style="color:#000">round_count</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#000">rounds</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic"># determine which direction to take</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">proposal_string</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">str</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">choice</span><span style="color:#000;font-weight:bold">([</span><span style="color:#4e9a06">&#39;left&#39;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#4e9a06">&#39;right&#39;</span><span style="color:#000;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">proposal_string</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;right&#39;</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">elif</span> <span style="color:#000">proposal_string</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;left&#39;</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#0000cf;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic"># condition for edge cases</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">n</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">or</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">p_move</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">float</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">min</span><span style="color:#000;font-weight:bold">((</span><span style="color:#000">proposal</span> <span style="color:#ce5c00;font-weight:bold">/</span> <span style="color:#000">current</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">roulette</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87">float</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">random</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">uniform</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">roulette</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">roulette</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#000">p_move</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">proposal</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">posterior</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">current</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#0000cf;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">round_count</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#0000cf;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">posterior</span>
+</span></span></code></pre></div><p>Notice that if somehow the proposal is greater than the last island or smaller than the first island, then it is set to zero.<br>
 We count the number of times we visit each island by adding 1 at the relevant index position in the posterior list. This is true even if we stay at the same island (we just add 1 to the current island).</p>
 <p>The following plots show the posterior for different number of rounds.</p>
 <img src="/posterior_100_rounds.png" style="max-width:100%">
@@ -287,8 +287,8 @@ We start with a beta prior $p(\theta) = \textrm{beta}(\theta|a,b)$ (for reading 
 <li>We randomly generate a proposal jump $\Delta\theta \sim N(0,\sigma)$ and denote the proposed value as $\theta_p = \theta_c + \Delta\theta$.</li>
 <li>Compute $p_{\textrm{move}}$, the probability of moving to the proposed value
 $$\begin{aligned}
-&amp;p_{\textrm{move}} = \min\left(1, \frac{P(\theta_p)}{P(\theta_c)} \right) \\ &amp;= \min\left(1, \frac{p(D|\theta_p)p(\theta_p)}{p(D|\theta_c)p(\theta_c)} \right)\\<br>
-&amp;= \min\left(1, \frac{\textrm{Bernoulli}(z, N|\theta_p)\textrm{beta}(\theta_p|a,b)}{\textrm{Bernoulli}(z, N|\theta_c)\textrm{beta}(\theta_c|a,b)} \right) \\<br>
+&amp;p_{\textrm{move}} = \min\left(1, \frac{P(\theta_p)}{P(\theta_c)} \right) \\ &amp;= \min\left(1, \frac{p(D|\theta_p)p(\theta_p)}{p(D|\theta_c)p(\theta_c)} \right)\\
+&amp;= \min\left(1, \frac{\textrm{Bernoulli}(z, N|\theta_p)\textrm{beta}(\theta_p|a,b)}{\textrm{Bernoulli}(z, N|\theta_c)\textrm{beta}(\theta_c|a,b)} \right) \\
 &amp;= \ldots
 \end{aligned}$$
 The last line is just replacing the relevant parts with the specific Bernoulli likelihood and beta distribution formulas.<br>
@@ -411,7 +411,7 @@ In future posts of this series I intend to write more about further issues of th
 		<p><a href="https://gohugo.io" target="_blank" rel="noopener">Built with Hugo</a></p>
 	</div>
 
-	<script src="/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
+	<script src="/js/main.min.a7205ef73b078c8daed6fe1b0826e8ba229ffabbb69d299d9446cf41f2c7d8aa.js" integrity="sha256-pyBe9zsHjI2u1v4bCCbouiKf+ru2nSmdlEbPQfLH2Ko=" crossorigin="anonymous"></script>
 </footer>
     </body>
 </html>
